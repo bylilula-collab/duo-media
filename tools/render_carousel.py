@@ -11,12 +11,13 @@ os.makedirs(out_dir, exist_ok=True)
 def b64(p):
     return base64.b64encode(open(p, 'rb').read()).decode()
 
-caveat = glob.glob(os.path.join(fonts_dir, '**', 'Caveat*.ttf'), recursive=True)[0]
-golos = glob.glob(os.path.join(fonts_dir, '**', 'GolosText*.ttf'), recursive=True)[0]
-font_css = (
-    "@font-face{font-family:'Caveat';font-weight:400 700;src:url(data:font/ttf;base64,%s) format('truetype')}"
-    "@font-face{font-family:'Golos Text';font-weight:400 900;src:url(data:font/ttf;base64,%s) format('truetype')}"
-) % (b64(caveat), b64(golos))
+FACES = [('Caveat', 'Caveat*.ttf', '400 700'), ('Golos Text', 'GolosText*.ttf', '400 900'),
+         ('Unbounded', 'Unbounded*.ttf', '200 900'), ('Manrope', 'Manrope*.ttf', '200 800')]
+font_css = ''
+for fam, pat, w in FACES:
+    hit = glob.glob(os.path.join(fonts_dir, '**', pat), recursive=True)
+    if hit:
+        font_css += "@font-face{font-family:'%s';font-weight:%s;src:url(data:font/ttf;base64,%s) format('truetype')}" % (fam, w, b64(hit[0]))
 
 photos = [json.load(open(f)) for f in glob.glob(os.path.join(data_dir, 'photos', '*.json'))]
 photos = [{'id': os.path.basename(f)[:-5], **json.load(open(f))} for f in glob.glob(os.path.join(data_dir, 'photos', '*.json'))]
